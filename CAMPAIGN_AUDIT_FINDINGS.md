@@ -200,8 +200,11 @@ Channel routing relies on these Lead fields being populated correctly upstream b
 - Looked up against `Agency_Mapping__mdt.Sub_Category__c` (and Category__c)
 - The matched mapping's Category/Sub-Category set is then matched against `Campaign.FedralAgency__c`
 - If `Federal_Agency__c` is null or has no mapping entry, the lead may attach to no Campaign
+- It is a **restricted** picklist on the Lead object (80 values total). Submitting a value that isn't in the picklist fails Lead creation outright (`bad value for restricted picklist field: <value>`).
 
 The full Agency_Mapping__mdt table (71 records) is preserved at `/tmp/agency_mapping.json`. Notable shape: Sub_Category values for sub-agencies are prefixed with `'    ► '` (4 spaces + ► + space) — e.g., `'    ► Dept of the Interior (DOI): Fish and Wildlife Service (FWS)'`. This whitespace prefix matters for matching.
+
+The intake form's agency dropdown now uses all 78 valid `Lead.Federal_Agency__c` picklist values (80 total minus the two non-agency channel markers `SOFA` and `FNN`), with sub-agencies preserved verbatim including the `'    ► '` prefix. Previously the dropdown shipped only 29 entries, mostly with short labels (e.g. `"NASA"`) that failed the restricted-picklist check on the Salesforce side.
 
 ### Other Lead fields the Apex inspects (less central)
 - `RecordTypeId` — must match `Lead.RecordType.DeveloperName = 'Federal'` for duplicate-checking branches to fire
