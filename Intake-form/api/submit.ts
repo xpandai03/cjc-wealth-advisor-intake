@@ -78,8 +78,10 @@ export default async function handler(
     }
   }
 
-  const agencyValue =
-    body.agency === "Other" ? body.agencyOther : body.agency;
+  const rawAgency = body.agency === "Other" ? body.agencyOther : body.agency;
+  // Path C: SF picklist now has bare sub-agency entries; strip the visual " ► " prefix
+  // before sending. Top-level agencies have no prefix and pass through unchanged.
+  const agencyValue = rawAgency?.replace(/^[\s► ]+/, '').trim() ?? rawAgency;
   if (!isString(agencyValue) || agencyValue.trim() === "") {
     missing.push("federalAgency");
   }
