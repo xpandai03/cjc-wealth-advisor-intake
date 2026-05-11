@@ -15,6 +15,7 @@ export function makeReq(opts: {
   body?: unknown;
   cookie?: string;
   headers?: Record<string, string>;
+  query?: Record<string, string | string[]>;
 }): VercelRequest {
   const headers: Record<string, string> = { ...(opts.headers ?? {}) };
   if (opts.cookie) headers.cookie = opts.cookie;
@@ -22,8 +23,9 @@ export function makeReq(opts: {
     method: opts.method ?? "POST",
     headers,
     body: opts.body ?? {},
+    query: opts.query ?? {},
     // Not all VercelRequest fields are populated — handlers under test only
-    // touch method, headers, body. Cast lets TypeScript accept the rest.
+    // touch method, headers, body, query. Cast lets TypeScript accept the rest.
   } as unknown as VercelRequest;
 }
 

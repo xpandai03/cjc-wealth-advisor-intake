@@ -149,9 +149,11 @@ export * from "./schema/submissions.js";
 export {
   and,
   count,
+  desc,
   eq,
   gt,
   gte,
+  ilike,
   inArray,
   lt,
   lte,
