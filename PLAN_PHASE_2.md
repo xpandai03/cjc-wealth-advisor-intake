@@ -508,31 +508,34 @@ Six sprints. Each sprint produces a shippable increment. Sprints are sized for ~
 
 **Depends on**: nothing.
 
-### Sprint 1 — Auth (Google OAuth + email allowlist) (≈1 day)
+### Sprint 1 — Auth (email/password + admin guard) (≈1 day) — ✅ DONE 2026-05-11
 
-**Exit criteria**
-- Signed-in admin can hit `GET /api/auth/me` and get `{ email, name, picture_url }`
+> **Auth approach changed mid-sprint.** Original plan called for Google OAuth via `arctic` + an email allowlist; Raunek chose **email/password** instead (faster to ship, no Workspace dependency, 3 pre-seeded admins, no public signup, password reset done manually via SQL for v1). The `arctic` / `oslo` / `jose` dependencies and the `/api/auth/google` + `/api/auth/callback` endpoints are **cut** from the plan. `lib/api-spec/openapi.yaml` extension is also deferred to Sprint 3 (the SPA uses plain `fetch` against the auth endpoints for now to keep Sprint 1 contained).
+
+**Shipped exit criteria**
+- Signed-in admin can hit `GET /api/auth/me` and get `{ email, name }`
 - Unauthenticated request to any protected route returns 401
-- Email not in allowlist → 403 on callback
-- Session cookie is HttpOnly+Secure+SameSite=Lax, 30-day rolling
-- `/admin/signin` renders Google sign-in button; success redirects to `/admin/links`
+- `cjc_admin_session` cookie: HttpOnly + Secure-in-prod + SameSite=Lax, 30-day TTL, sliding renewal once >24h old
+- `/admin/signin` renders email + password form; success redirects to `?next=` (same-origin /admin/* only — anti open-redirect)
+- Per-email rate limit: 5 failed attempts in 15 min → 429
+- Equal-timing dummy bcrypt on unknown email so login can't be used to enumerate registered accounts
+- Inactive users (`is_active = false`) have their sessions auto-purged on next request
 
-**Files**
-- `api/auth/google.ts` (initiate flow with `arctic`)
-- `api/auth/callback.ts` (exchange code, check allowlist, write `sessions` row, set cookie, redirect)
-- `api/auth/me.ts`, `api/auth/logout.ts`
-- `api/_lib/auth.ts` — shared session-reading helper used by all protected endpoints
-- `artifacts/intake-form/src/pages/admin/AdminLayout.tsx` — auth guard + user chip + tab nav
-- `artifacts/intake-form/src/pages/admin/SignIn.tsx`
-- `artifacts/intake-form/src/lib/auth-context.tsx`
-- `lib/api-spec/openapi.yaml` — add `/auth/*` operations
-- `lib/api-zod` + `lib/api-client-react` — regen
+**Files shipped**
+- Schema (`lib/db/src/schema/auth.ts`): `users`, refactored `sessions` (FK to users, cascade), `login_attempts`
+- Server: `api/_lib/auth.ts`, `api/_lib/rate-limit.ts`, `api/auth/{login,logout,me}.ts`
+- UI: `artifacts/intake-form/src/lib/auth-context.tsx`, `pages/admin/{SignIn,AdminLayout,Links}.tsx`, `App.tsx` routes
+- Scripts: `scripts/src/seed-admin-users.ts` (idempotent; reads passwords from env vars only; 12-char minimum; never logs password values)
+- Tests: `api/_test/{auth,login,logout}.test.ts` + harness + fixtures; 17 cases, all green against Neon, via `pnpm run test:api` (Node's built-in `node:test`, no new test framework dep)
 
-**Tests**
-- Unit: `auth.ts` helper validates expired sessions, missing cookies, allowlist
-- Manual E2E: log in as each of the 3 allowlisted emails; verify a non-allowlisted email is blocked
+**Files NOT shipped (cut from scope, per Raunek)**
+- `api/auth/google.ts` + `api/auth/callback.ts` — Google OAuth path removed
+- `lib/api-spec/openapi.yaml` `/auth/*` ops — deferred to Sprint 3 when other admin endpoints land
+- Password reset / email verification / 2FA / password-change UI / account-lockout UI
 
-**Depends on**: Sprint 0.
+**Pre-flight checklist (all green)**: no plaintext password logged or stored; identical 401 body for unknown-email vs wrong-password; equal-timing dummy bcrypt verified by test; per-email (not per-IP) rate limit; HttpOnly + Secure-in-prod + SameSite=Lax cookie; logout removes session row from DB; seed script never logs passwords; no register/reset endpoints exposed; /admin/* server-gated.
+
+**Depends on**: Sprint 0. **Stacked PR** on `feature/phase-2-sprint-0`; GitHub auto-retargets to main on Sprint 0 merge.
 
 ### Sprint 2 — Scoring engine + cutover from Zapier (≈1.5 days)
 
