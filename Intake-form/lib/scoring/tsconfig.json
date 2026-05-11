@@ -4,6 +4,9 @@
     "composite": true,
     "declaration": true,
     "declarationMap": true,
+    "module": "node16",
+    "moduleResolution": "node16",
+    "esModuleInterop": true,
     "outDir": "./dist",
     "rootDir": "src",
     "types": ["node"]
