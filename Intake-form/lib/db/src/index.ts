@@ -10,13 +10,19 @@ import {
 import { createInsertSchema } from "drizzle-zod";
 import pg from "pg";
 import { z } from "zod/v4";
+// .js extensions on relative imports are required for TypeScript's
+// node16/nodenext module-resolution mode, which Vercel's function-compile
+// pipeline uses. TypeScript resolves .js back to the corresponding .ts
+// source at compile time. Apply to ALL new relative imports in workspace
+// packages with `composite: true`.
+//
 // Star-import the OTHER schema files into a single namespace so Drizzle's
 // query-builder can resolve every table. The auth schema is inlined below
 // (see comment above the `users` table) — DO NOT add it to this import block.
-import * as linksSchema from "./schema/links";
-import * as scoringSchema from "./schema/scoring";
-import * as settingsSchema from "./schema/settings";
-import * as submissionsSchema from "./schema/submissions";
+import * as linksSchema from "./schema/links.js";
+import * as scoringSchema from "./schema/scoring.js";
+import * as settingsSchema from "./schema/settings.js";
+import * as submissionsSchema from "./schema/submissions.js";
 
 // ---------------------------------------------------------------------------
 // INLINED: auth schema lives here directly rather than in ./schema/auth
@@ -130,10 +136,10 @@ export const db = drizzle(pool, { schema });
 
 // Re-export the other schema files directly (file-path imports). These
 // continue to work through the standard re-export path.
-export * from "./schema/links";
-export * from "./schema/scoring";
-export * from "./schema/settings";
-export * from "./schema/submissions";
+export * from "./schema/links.js";
+export * from "./schema/scoring.js";
+export * from "./schema/settings.js";
+export * from "./schema/submissions.js";
 
 // Re-export the drizzle query-builder helpers we use across the app.
 // API code (Intake-form/api/*) imports these from @workspace/db so there's

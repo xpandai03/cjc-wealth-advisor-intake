@@ -9,7 +9,7 @@ export {
   loginAttempts,
   sessions,
   users,
-} from "../index";
+} from "../index.js";
 export type {
   InsertLoginAttempt,
   InsertSession,
@@ -17,4 +17,4 @@ export type {
   LoginAttempt,
   Session,
   User,
-} from "../index";
+} from "../index.js";
