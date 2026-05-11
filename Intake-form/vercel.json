@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "pnpm run typecheck:libs && pnpm --filter @workspace/intake-form build",
+  "buildCommand": "rm -rf lib/*/dist lib/*/tsconfig.tsbuildinfo && pnpm run typecheck:libs && pnpm --filter @workspace/intake-form build",
   "outputDirectory": "artifacts/intake-form/dist/public",
   "installCommand": "pnpm install --frozen-lockfile=false",
   "rewrites": [
