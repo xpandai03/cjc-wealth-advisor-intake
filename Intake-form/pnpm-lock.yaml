@@ -162,6 +162,9 @@ importers:
       '@workspace/db':
         specifier: workspace:*
         version: link:lib/db
+      '@workspace/scoring':
+        specifier: workspace:*
+        version: link:lib/scoring
       bcryptjs:
         specifier: 'catalog:'
         version: 2.4.3
@@ -621,6 +624,9 @@ importers:
       '@workspace/db':
         specifier: workspace:*
         version: link:../lib/db
+      '@workspace/scoring':
+        specifier: workspace:*
+        version: link:../lib/scoring
       bcryptjs:
         specifier: 'catalog:'
         version: 2.4.3

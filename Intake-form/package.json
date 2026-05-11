@@ -8,11 +8,14 @@
     "typecheck:libs": "tsc --build",
     "typecheck:api": "tsc --noEmit -p api/tsconfig.json",
     "typecheck": "pnpm run typecheck:libs && pnpm run typecheck:api && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck",
-    "test:api": "node --import tsx --test api/_test/auth.test.ts api/_test/login.test.ts api/_test/logout.test.ts"
+    "test:api": "pnpm run typecheck:libs && node --import tsx --test api/_test/auth.test.ts api/_test/login.test.ts api/_test/logout.test.ts api/_test/submit.test.ts",
+    "test:scoring": "pnpm run typecheck:libs && node --import tsx --test lib/scoring/test/evaluator.test.ts lib/scoring/test/compiler.test.ts lib/scoring/test/v1-rule-set.test.ts",
+    "test": "pnpm run test:scoring && pnpm run test:api"
   },
   "private": true,
   "dependencies": {
     "@workspace/db": "workspace:*",
+    "@workspace/scoring": "workspace:*",
     "bcryptjs": "catalog:",
     "zod": "catalog:"
   },

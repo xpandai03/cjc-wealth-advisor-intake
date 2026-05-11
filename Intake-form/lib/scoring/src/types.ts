@@ -1,46 +1,53 @@
 // Phase 2 — scoring engine types.
-// Mirrors PLAN_PHASE_2.md §5. Engine implementation lands in Sprint 2.
+// Mirrors PLAN_PHASE_2.md §5.
 
-// All form field names the rule engine knows about. Mirrors the FormData
-// type in Home.tsx; engine input is camelCase (DB column names are snake_case).
-export type LeadField =
-  | "firstName"
-  | "lastName"
-  | "email"
-  | "phone"
-  | "stateResidence"
-  | "federalAgency"
-  | "speakerRating"
-  | "workshopContent"
-  | "preRetirementReview"
-  | "evalComments"
-  | "yearsToRetire"
-  | "age"
-  | "separating"
-  | "maritalStatus"
-  | "maxingTsp"
-  | "tspContributionPct"
-  | "externalInvestments"
-  | "tspBalance"
-  | "areasOfConcern"
-  | "source"
-  | "leadSource"
-  | "surveyDetail"
-  | "campaign"
-  | "event";
+// Runtime list of every form field the rule engine knows about. Kept in
+// sync with the FormData shape in artifacts/intake-form/src/pages/Home.tsx
+// (engine input is camelCase; DB column names are snake_case).
+export const LEAD_FIELDS = [
+  "firstName",
+  "lastName",
+  "email",
+  "phone",
+  "stateResidence",
+  "federalAgency",
+  "speakerRating",
+  "workshopContent",
+  "preRetirementReview",
+  "evalComments",
+  "yearsToRetire",
+  "age",
+  "separating",
+  "maritalStatus",
+  "maxingTsp",
+  "tspContributionPct",
+  "externalInvestments",
+  "tspBalance",
+  "areasOfConcern",
+  "source",
+  "leadSource",
+  "surveyDetail",
+  "campaign",
+  "event",
+] as const;
+
+export type LeadField = (typeof LEAD_FIELDS)[number];
 
 export type LeadInput = Partial<Record<LeadField, string | null | undefined>>;
 
-export type ConditionOp =
-  | "equals"
-  | "notEquals"
-  | "in"
-  | "notIn"
-  | "isNull"
-  | "notNull"
-  | "contains"
-  | "notContains"
-  | "matchesRegex";
+export const CONDITION_OPS = [
+  "equals",
+  "notEquals",
+  "in",
+  "notIn",
+  "isNull",
+  "notNull",
+  "contains",
+  "notContains",
+  "matchesRegex",
+] as const;
+
+export type ConditionOp = (typeof CONDITION_OPS)[number];
 
 export type Condition = {
   field: LeadField;
@@ -57,14 +64,20 @@ export type ConditionGroup = {
   not?: Condition | ConditionGroup;
 };
 
+export const RANK_VALUES = ["A", "B+", "B", "C", "N/A"] as const;
+export type Rank = (typeof RANK_VALUES)[number];
+
 // Fields the rule writes when matched. Both optional — a rule can set
 // just rank. Kept narrow for v1; future extensibility (setStatus, etc.)
 // goes here.
 export type Outcome = {
-  rank?: "A" | "B+" | "B" | "C" | "N/A";
-  // Exact SF picklist string, e.g. "10  (over $1mm)". Note the double-space
-  // in "7  ($0-$350k)" and "8  ($351k-$600k)" — picklist values are
-  // whitespace-sensitive and must be preserved verbatim.
+  rank?: Rank;
+  // Exact SF picklist string. Note the whitespace:
+  //   "7  ($0-$350k)"     — TWO spaces
+  //   "8  ($351k-$600k)"  — TWO spaces
+  //   "9 ($601k - $1mm)"  — ONE space
+  //   "10  (over $1mm)"   — TWO spaces
+  // Picklist values are whitespace-sensitive; preserve verbatim.
   leadScore?: string;
 };
 
@@ -108,4 +121,10 @@ export type EvaluateResult = {
   rank: Outcome["rank"];
   leadScore: Outcome["leadScore"];
   trace: ScoringTrace;
+};
+
+// Metadata supplied alongside a RuleSet so the trace can record provenance.
+export type RuleSetMetadata = {
+  ruleSetId: string;
+  version: number;
 };
