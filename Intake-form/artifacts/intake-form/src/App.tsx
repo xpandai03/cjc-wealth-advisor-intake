@@ -8,6 +8,9 @@ import NotFound from "@/pages/not-found";
 import LinkGenerator from "@/pages/LinkGenerator";
 import SignIn from "@/pages/admin/SignIn";
 import AdminLinks from "@/pages/admin/Links";
+import AdminSubmissions from "@/pages/admin/Submissions";
+import AdminActivity from "@/pages/admin/Activity";
+import AdminScoringRules from "@/pages/admin/ScoringRules";
 import { AuthProvider } from "@/lib/auth-context";
 
 const queryClient = new QueryClient();
@@ -37,6 +40,21 @@ function Router() {
       <Route path="/admin/links">
         <WithAuth>
           <AdminLinks />
+        </WithAuth>
+      </Route>
+      <Route path="/admin/submissions">
+        <WithAuth>
+          <AdminSubmissions />
+        </WithAuth>
+      </Route>
+      <Route path="/admin/activity">
+        <WithAuth>
+          <AdminActivity />
+        </WithAuth>
+      </Route>
+      <Route path="/admin/scoring-rules">
+        <WithAuth>
+          <AdminScoringRules />
         </WithAuth>
       </Route>
       <Route component={NotFound} />
