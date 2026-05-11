@@ -1,6 +1,7 @@
 import type { VercelRequest } from "@vercel/node";
-import { and, count, eq, gte } from "drizzle-orm";
-import { db, loginAttempts } from "@workspace/db";
+// Drizzle helpers imported via @workspace/db (single module identity) — see
+// the re-export block in lib/db/src/index.ts for why.
+import { and, count, db, eq, gte, loginAttempts } from "@workspace/db";
 
 export const MAX_FAILED_ATTEMPTS = 5;
 export const WINDOW_MINUTES = 15;

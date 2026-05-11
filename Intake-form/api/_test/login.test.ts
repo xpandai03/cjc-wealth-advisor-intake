@@ -7,8 +7,7 @@
 
 import { after, before, describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { eq } from "drizzle-orm";
-import { db, loginAttempts } from "@workspace/db";
+import { db, eq, loginAttempts } from "@workspace/db";
 import loginHandler from "../auth/login";
 import { SESSION_COOKIE_NAME } from "../_lib/auth";
 import {

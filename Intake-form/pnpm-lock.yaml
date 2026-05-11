@@ -165,9 +165,6 @@ importers:
       bcryptjs:
         specifier: 'catalog:'
         version: 2.4.3
-      drizzle-orm:
-        specifier: 'catalog:'
-        version: 0.45.1(@types/pg@8.18.0)(pg@8.20.0)
       zod:
         specifier: 'catalog:'
         version: 3.25.76
