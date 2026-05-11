@@ -9,8 +9,7 @@
 
 import { after, before, describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { eq } from "drizzle-orm";
-import { db, sessions } from "@workspace/db";
+import { db, eq, sessions, users } from "@workspace/db";
 import {
   SESSION_COOKIE_NAME,
   getSessionFromCookie,
@@ -104,9 +103,9 @@ describe("requireAuth + getSessionFromCookie", () => {
     const sessionId = await makeSessionFor(user.id);
     // Flip isActive off in-place.
     await db
-      .update((await import("@workspace/db")).users)
+      .update(users)
       .set({ isActive: false })
-      .where(eq((await import("@workspace/db")).users.id, user.id));
+      .where(eq(users.id, user.id));
     const req = makeReq({
       method: "GET",
       cookie: `${SESSION_COOKIE_NAME}=${sessionId}`,

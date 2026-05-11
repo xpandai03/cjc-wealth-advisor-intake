@@ -14,7 +14,6 @@
   "dependencies": {
     "@workspace/db": "workspace:*",
     "bcryptjs": "catalog:",
-    "drizzle-orm": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {

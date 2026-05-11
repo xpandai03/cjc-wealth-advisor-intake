@@ -1,8 +1,18 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import bcrypt from "bcryptjs";
 import { randomBytes } from "node:crypto";
-import { and, eq, gt, lt } from "drizzle-orm";
-import { db, sessions, users, type Session, type User } from "@workspace/db";
+// Drizzle helpers imported via @workspace/db (single module identity) — see
+// the re-export block in lib/db/src/index.ts for why.
+import {
+  and,
+  db,
+  eq,
+  lt,
+  sessions,
+  users,
+  type Session,
+  type User,
+} from "@workspace/db";
 
 export const SESSION_COOKIE_NAME = "cjc_admin_session";
 export const SESSION_TTL_SECONDS = 60 * 60 * 24 * 30; // 30 days
@@ -244,5 +254,3 @@ export async function recordSuccessfulLogin(userId: string): Promise<void> {
     .where(eq(users.id, userId));
 }
 
-// Re-export for tests that want to assert against the runtime constant.
-export { gt };
