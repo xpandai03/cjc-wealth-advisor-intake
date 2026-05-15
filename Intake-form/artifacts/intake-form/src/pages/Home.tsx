@@ -81,9 +81,13 @@ const initialData: FormData = {
   externalInvestments: "",
   tspBalance: "",
   areasOfConcern: "",
-  source: "federal",
-  leadSource: "SOFA: Webinar",
-  surveyDetail: "DC SOFA",
+  // Source attribution: pre-hydration defaults are empty strings; the
+  // useEffect on mount populates them from the URL's ?source= param and
+  // related UTM params. Hardcoding "federal"/"SOFA: Webinar" here used to
+  // override the URL-driven source for any non-legacy channel — fixed.
+  source: "",
+  leadSource: "",
+  surveyDetail: "",
   campaign: "",
   event: "",
   utmSource: "",
@@ -262,14 +266,25 @@ export default function Home() {
     setIsClient(true);
     const params = new URLSearchParams(window.location.search);
     const sourceKey = (params.get("source") ?? "").toLowerCase();
-    const knownSource = sourceKey in SOURCE_MAP ? sourceKey : "federal";
-    const leadSource = SOURCE_MAP[knownSource] ?? "SOFA: Webinar";
-    const surveyDetail = SURVEY_DETAIL_MAP[knownSource] ?? SURVEY_DETAIL_DEFAULT;
+    // Pass the raw source key through to the server. The marketing_sources
+    // table lookup in api/submit.ts resolves it to the right LeadSource +
+    // Survey_Detail__c. This file used to narrow unknown keys to "federal"
+    // (and hardcode leadSource="SOFA: Webinar"), which silently broke
+    // attribution for any new marketing channel — Instagram leads landed
+    // in Salesforce as LeadSource=SOFA Webinar regardless of the URL.
+    //
+    // For legacy keys (fnn/internal/federal) the server still resolves to
+    // the byte-exact same LeadSource it always has — the migration seeded
+    // those rows verbatim.
     setData((prev) => ({
       ...prev,
-      source: knownSource,
-      leadSource,
-      surveyDetail,
+      source: sourceKey,
+      // leadSource and surveyDetail intentionally left at their defaults
+      // ("" once seeded properly — see initialData) so the server's
+      // marketing_sources lookup is what decides. Legacy seeded values
+      // preserve byte-exact attribution.
+      leadSource: "",
+      surveyDetail: "",
       campaign: params.get("campaign") ?? "",
       event: params.get("event") ?? "",
       utmSource: params.get("utm_source") ?? "",
