@@ -707,7 +707,10 @@ export default function Home() {
   return (
     <div
       className="min-h-screen flex flex-col font-sans relative overflow-hidden"
-      style={{ background: "linear-gradient(135deg, #8B1A1A 0%, #A82020 40%, #C0282B 100%)" }}
+      // Solid CJC red — matches the admin shell (AdminLayout.tsx) so the
+      // logo PNG's edges blend seamlessly. Was a 3-stop gradient that
+      // produced dark/light patches around the logo (see screenshot 2026-05-15).
+      style={{ background: "#CD1C3A" }}
     >
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-white/5" />
@@ -716,18 +719,22 @@ export default function Home() {
         <div className="absolute top-1/2 right-0 w-48 h-96 bg-white/3 rounded-l-full" />
       </div>
 
-      <header className="relative z-10 w-full max-w-5xl mx-auto px-6 py-6 flex items-center justify-between">
-        <div className="flex items-center">
-          <img
-            src={cjLogo}
-            alt="CJ Wealth Management"
-            className="h-14 w-auto object-contain rounded-lg"
-          />
-        </div>
-        <div className="flex items-center gap-2 text-sm font-medium text-white/70">
-          <span>Step {stepIndex + 1} of {totalSteps}</span>
-        </div>
+      {/* Hero logo — centered, sized to match the admin app's
+          LinkGenerator hero. No rounded-lg (was clipping/highlighting the
+          logo's edge against the gradient). */}
+      <header className="relative z-10 w-full pt-6 px-12 sm:px-6 flex justify-center">
+        <img
+          src={cjLogo}
+          alt="CJ Wealth Management"
+          className="h-16 sm:h-20 md:h-24 w-auto object-contain"
+        />
       </header>
+
+      <div className="relative z-10 w-full max-w-5xl mx-auto px-6 mt-6 mb-2 flex justify-end">
+        <span className="text-sm font-medium text-white/70">
+          Step {stepIndex + 1} of {totalSteps}
+        </span>
+      </div>
 
       <div className="relative z-10 w-full max-w-5xl mx-auto px-6 mb-8">
         <div className="h-1.5 w-full bg-white/20 rounded-full overflow-hidden">
