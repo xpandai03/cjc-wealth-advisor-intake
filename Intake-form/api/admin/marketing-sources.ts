@@ -15,7 +15,7 @@ import {
   marketingSources,
 } from "@workspace/db";
 import { z } from "zod";
-import { requireAuth } from "../_lib/auth";
+import { requireRole } from "../_lib/auth";
 
 const createBodySchema = z.object({
   source_key: z
@@ -46,7 +46,14 @@ export default async function handler(
   req: VercelRequest,
   res: VercelResponse,
 ) {
-  const auth = await requireAuth(req, res);
+  // Per-method gating: the Links tab (open to marketing) reads the source
+  // catalog via GET, so GET is allowed for both roles. Creating a source
+  // (POST) is a Sources-tab action — admin only.
+  const auth = await requireRole(
+    req,
+    res,
+    req.method === "GET" ? ["admin", "marketing"] : ["admin"],
+  );
   if (!auth) return;
 
   if (req.method === "GET") {

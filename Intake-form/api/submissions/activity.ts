@@ -13,7 +13,7 @@
 
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { db, sql } from "@workspace/db";
-import { requireAuth } from "../_lib/auth";
+import { requireRole } from "../_lib/auth";
 
 function firstOf(value: unknown): string | undefined {
   if (Array.isArray(value)) return value[0] as string | undefined;
@@ -62,7 +62,7 @@ export default async function handler(
     res.setHeader("Allow", "GET");
     return res.status(405).json({ error: "Method not allowed" });
   }
-  const auth = await requireAuth(req, res);
+  const auth = await requireRole(req, res, ["admin", "marketing"]);
   if (!auth) return;
 
   const todayUtc = new Date(

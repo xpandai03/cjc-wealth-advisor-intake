@@ -8,9 +8,15 @@
 //
 // Usage:
 //   DATABASE_URL=postgres://... \
-//   ADMIN_1_EMAIL=raunek@xpandai.com   ADMIN_1_PASSWORD='...' ADMIN_1_NAME='Raunek Pratap' \
-//   ADMIN_2_EMAIL=chris@cjcwealth.com  ADMIN_2_PASSWORD='...' ADMIN_2_NAME='Chris Campbell' \
-//   ADMIN_3_EMAIL=mel@cjcwealth.com    ADMIN_3_PASSWORD='...' ADMIN_3_NAME='Mel Caro' \
+//   ADMIN_1_EMAIL=raunek@xpandai.com ADMIN_1_PASSWORD='...' ADMIN_1_NAME='Raunek Pratap' \
+//   pnpm --filter @workspace/scripts seed-admin-users
+//
+// Optional per-slot ADMIN_N_ROLE — 'admin' (default) or 'marketing'. A
+// 'marketing' user sees only the Links, Submissions, and Activity tabs.
+// Example — seed a limited-access marketing user:
+//   DATABASE_URL=postgres://... \
+//   ADMIN_1_EMAIL=hanzala@example.com ADMIN_1_PASSWORD='...' \
+//   ADMIN_1_NAME='Muhammad Hanzala' ADMIN_1_ROLE='marketing' \
 //   pnpm --filter @workspace/scripts seed-admin-users
 //
 // Run with only the admins you want to seed — missing ADMIN_N_* trios are
@@ -23,7 +29,28 @@ import { db, pool, users } from "@workspace/db";
 
 const BCRYPT_COST = 10;
 
-type AdminSpec = { email: string; password: string; name: string; slot: number };
+type Role = "admin" | "marketing";
+type AdminSpec = {
+  email: string;
+  password: string;
+  name: string;
+  role: Role;
+  slot: number;
+};
+
+// ADMIN_N_ROLE is optional; absent/empty → 'admin'. Any other value is a
+// hard error so a typo can never silently grant the wrong access level.
+// Mirrors parseRole() in api/_lib/roles.ts (kept inline — the scripts
+// package can't import from the api function tree).
+function readRole(slot: number): Role {
+  const raw = process.env[`ADMIN_${slot}_ROLE`];
+  if (raw == null || raw.trim() === "") return "admin";
+  const v = raw.trim().toLowerCase();
+  if (v === "admin" || v === "marketing") return v;
+  throw new Error(
+    `ADMIN_${slot}_ROLE invalid ("${raw}"). Use 'admin' or 'marketing'.`,
+  );
+}
 
 function readAdminFromEnv(slot: number): AdminSpec | null {
   const email = process.env[`ADMIN_${slot}_EMAIL`];
@@ -40,7 +67,13 @@ function readAdminFromEnv(slot: number): AdminSpec | null {
       `ADMIN_${slot}_PASSWORD too short (${password.length} chars). Use 12+ chars; do NOT log this value.`,
     );
   }
-  return { email: email.trim().toLowerCase(), password, name: name.trim(), slot };
+  return {
+    email: email.trim().toLowerCase(),
+    password,
+    name: name.trim(),
+    role: readRole(slot),
+    slot,
+  };
 }
 
 async function main() {
@@ -74,8 +107,15 @@ async function main() {
     const passwordHash = await bcrypt.hash(spec.password, BCRYPT_COST);
     await db
       .insert(users)
-      .values({ email: spec.email, name: spec.name, passwordHash });
-    console.log(`  [${spec.slot}] ${spec.email}: inserted (name=${JSON.stringify(spec.name)})`);
+      .values({
+        email: spec.email,
+        name: spec.name,
+        passwordHash,
+        role: spec.role,
+      });
+    console.log(
+      `  [${spec.slot}] ${spec.email}: inserted (name=${JSON.stringify(spec.name)}, role=${spec.role})`,
+    );
     inserted++;
   }
 

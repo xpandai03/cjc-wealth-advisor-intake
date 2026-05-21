@@ -15,7 +15,7 @@ import {
   scoringRuleSets,
   submissions,
 } from "@workspace/db";
-import { requireAuth } from "../_lib/auth";
+import { requireRole } from "../_lib/auth";
 
 const UUID_PATTERN =
   /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
@@ -34,7 +34,7 @@ export default async function handler(
     res.setHeader("Allow", "GET");
     return res.status(405).json({ error: "Method not allowed" });
   }
-  const auth = await requireAuth(req, res);
+  const auth = await requireRole(req, res, ["admin", "marketing"]);
   if (!auth) return;
 
   const id = firstOf(req.query.id);

@@ -29,6 +29,8 @@ export async function createTestUser(opts?: {
   password?: string;
   name?: string;
   isActive?: boolean;
+  /** RBAC role. Omit to take the column default ('admin'). */
+  role?: "admin" | "marketing";
 }): Promise<{ user: User; plaintextPassword: string }> {
   const email = (opts?.email ?? uniqueEmail()).toLowerCase();
   const plaintextPassword = opts?.password ?? "test-password-123!";
@@ -40,6 +42,7 @@ export async function createTestUser(opts?: {
       passwordHash,
       name: opts?.name ?? "Test User",
       isActive: opts?.isActive ?? true,
+      ...(opts?.role ? { role: opts.role } : {}),
     })
     .returning();
   createdUserIds.add(user.id);

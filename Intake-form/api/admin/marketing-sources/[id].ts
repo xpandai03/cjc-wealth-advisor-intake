@@ -15,7 +15,7 @@ import {
   marketingSources,
 } from "@workspace/db";
 import { z } from "zod";
-import { requireAuth } from "../../_lib/auth";
+import { requireRole } from "../../_lib/auth";
 
 const UUID_PATTERN =
   /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
@@ -42,7 +42,7 @@ export default async function handler(
   req: VercelRequest,
   res: VercelResponse,
 ) {
-  const auth = await requireAuth(req, res);
+  const auth = await requireRole(req, res, ["admin"]);
   if (!auth) return;
 
   const id = firstOf(req.query.id);

@@ -39,7 +39,7 @@ import {
   sql,
   submissions,
 } from "@workspace/db";
-import { requireAuth } from "../_lib/auth";
+import { requireRole } from "../_lib/auth";
 
 const ALLOWED_SOURCES = new Set(["federal", "internal", "fnn"]);
 const ALLOWED_SF_STATUSES = new Set([
@@ -91,7 +91,7 @@ export default async function handler(
     res.setHeader("Allow", "GET");
     return res.status(405).json({ error: "Method not allowed" });
   }
-  const auth = await requireAuth(req, res);
+  const auth = await requireRole(req, res, ["admin", "marketing"]);
   if (!auth) return;
 
   const q = req.query;

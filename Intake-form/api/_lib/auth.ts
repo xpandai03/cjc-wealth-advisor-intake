@@ -13,6 +13,7 @@ import {
   type Session,
   type User,
 } from "@workspace/db";
+import { isRoleAllowed, type Role } from "./roles";
 
 export const SESSION_COOKIE_NAME = "cjc_admin_session";
 export const SESSION_TTL_SECONDS = 60 * 60 * 24 * 30; // 30 days
@@ -73,7 +74,7 @@ function parseCookies(header: string | undefined): Record<string, string> {
 
 export type AuthedSession = {
   session: Session;
-  user: Pick<User, "id" | "email" | "name" | "isActive">;
+  user: Pick<User, "id" | "email" | "name" | "isActive" | "role">;
 };
 
 /**
@@ -103,6 +104,7 @@ export async function getSessionFromCookie(
       email: users.email,
       name: users.name,
       isActive: users.isActive,
+      role: users.role,
     })
     .from(sessions)
     .innerJoin(users, eq(sessions.userId, users.id))
@@ -148,6 +150,7 @@ export async function getSessionFromCookie(
       email: row.email,
       name: row.name,
       isActive: row.isActive,
+      role: row.role,
     },
   };
 }
@@ -231,6 +234,30 @@ export async function requireAuth(
   const auth = await getSessionFromCookie(req);
   if (!auth) {
     res.status(401).json({ error: "Unauthorized" });
+    return null;
+  }
+  return auth;
+}
+
+/**
+ * Like requireAuth, but also enforces RBAC: the authenticated user's role
+ * must be in `allowed`. Outcomes (handler must early-return on null):
+ *   - no / invalid session        → 401 { error: "Unauthorized" }
+ *   - authenticated, wrong role   → 403 { error: "forbidden" }
+ *   - authenticated, role allowed → returns the AuthedSession
+ *
+ * Every authenticated endpoint declares its allowed roles explicitly — there
+ * is no implicit access. See api/_lib/roles.ts for the Role definition.
+ */
+export async function requireRole(
+  req: VercelRequest,
+  res: VercelResponse,
+  allowed: readonly Role[],
+): Promise<AuthedSession | null> {
+  const auth = await requireAuth(req, res);
+  if (!auth) return null; // requireAuth already wrote the 401
+  if (!isRoleAllowed(auth.user.role, allowed)) {
+    res.status(403).json({ error: "forbidden" });
     return null;
   }
   return auth;

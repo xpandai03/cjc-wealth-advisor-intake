@@ -11,7 +11,7 @@
 //                                         'held' with sfError populated
 
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { requireAuth } from "../../_lib/auth";
+import { requireRole } from "../../_lib/auth";
 import { releaseHeldSubmission } from "../../_lib/release";
 
 const UUID_PATTERN =
@@ -31,7 +31,7 @@ export default async function handler(
     res.setHeader("Allow", "POST");
     return res.status(405).json({ error: "Method not allowed" });
   }
-  const auth = await requireAuth(req, res);
+  const auth = await requireRole(req, res, ["admin"]);
   if (!auth) return;
 
   const id = firstOf(req.query.id);
