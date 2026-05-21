@@ -136,8 +136,12 @@ export type CreateLeadResult = {
 
 export type CreateLeadError = {
   status: number;
-  /** Errors array from Salesforce. Caller logs these; don't leak to client. */
-  errors: Array<{ statusCode?: string; message?: string; fields?: string[] }>;
+  /**
+   * Errors array from Salesforce. Caller logs these; don't leak to client.
+   * NB: Salesforce REST error objects use `errorCode` (not `statusCode`) —
+   * reading the wrong key silently yields `undefined`.
+   */
+  errors: Array<{ errorCode?: string; message?: string; fields?: string[] }>;
 };
 
 export class SalesforceCreateLeadError extends Error {
@@ -223,13 +227,13 @@ export async function createLead(fields: SalesforceLeadFields): Promise<CreateLe
 // updateLead — partial-field PATCH on an existing Salesforce Lead
 // ---------------------------------------------------------------------------
 //
-// Used by api/submit.ts to optimistically flip Lead.Meeting_stage__c to
-// 'Scheduled' the moment a qualifying intake-form submission is about to
-// redirect the user to TimeTap. The proper webhook-driven flip happens
-// later via the Update_Lead_On_Appointment Salesforce flow (Phase 2 —
-// see cjc-sf-metadata/reports/welcome-email-investigation.md §2 for the
-// gap), but until that ships, this PATCH keeps the Lead's stage in sync
-// with user intent rather than waiting for booking confirmation.
+// Generic partial-field PATCH helper for an existing Lead. Its only
+// caller — an optimistic Meeting_stage__c='Scheduled' write in
+// api/submit.ts — was removed because Salesforce's
+// AssociateAdvisorValidation rule rejects that state while
+// Associate_Advisor__c is blank (always true at submit time). Currently
+// unused; retained as a generic helper. See api/submit.ts for the
+// removal rationale.
 //
 // Best-effort: throws SalesforceCreateLeadError on failure (callers must
 // wrap in try/catch). One 401 retry, same pattern as createLead.
