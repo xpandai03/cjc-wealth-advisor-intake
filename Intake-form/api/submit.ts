@@ -11,7 +11,6 @@ import {
   SalesforceCreateLeadError,
   createLead,
   strippedFederalAgency,
-  updateLead,
 } from "./_lib/sf";
 import {
   SOURCE_DEFAULTS,
@@ -325,40 +324,11 @@ export default async function handler(
           })
         : null;
 
-    // Optimistic Meeting_stage update — when the user is being redirected
-    // to TimeTap (i.e. has clicked through to scheduling), flip the Lead's
-    // Meeting_stage__c picklist from 'Unscheduled' to 'Scheduled' now,
-    // rather than waiting for the booking confirmation to arrive via the
-    // TimeTap webhook. Two reasons:
-    //   1. The webhook flow that would normally do this update
-    //      (Update_Lead_On_Appointment) doesn't actually write
-    //      Meeting_stage__c today — see
-    //      cjc-sf-metadata/reports/welcome-email-investigation.md §2.
-    //   2. Even after that gap is patched, the webhook is on a 5-min
-    //      scheduledPath delay, so this gives Crystal an immediate
-    //      "user is scheduling" signal.
-    //
-    // Best-effort: the PATCH is awaited but its failure is logged and
-    // suppressed. The redirectUrl response is the same regardless.
-    // Non-qualifying / held leads (redirectUrl=null) are NOT touched —
-    // their Meeting_stage stays at whatever Salesforce-side default
-    // applies (typically 'Unscheduled').
-    if (redirectUrl) {
-      try {
-        await updateLead(sfResult.id, { Meeting_stage__c: "Scheduled" });
-      } catch (updateErr) {
-        const updateMessage =
-          updateErr instanceof SalesforceCreateLeadError
-            ? `sf:${updateErr.status}:${updateErr.errors[0]?.statusCode ?? "unknown"}`
-            : updateErr instanceof Error
-              ? updateErr.message
-              : String(updateErr);
-        console.warn("submit: optimistic Meeting_stage update failed", {
-          leadId: sfResult.id,
-          message: updateMessage,
-        });
-      }
-    }
+    // NOTE: We previously wrote Meeting_stage='Scheduled' here optimistically,
+    // but Salesforce's AssociateAdvisorValidation rule rejects this state when
+    // Associate_Advisor__c is blank (which it always is at submit time — advisor
+    // gets assigned by the TimeTap booking webhook). The Apex webhook flow handles
+    // Meeting_stage correctly after booking. Do not reintroduce this write.
 
     const response: { success: true; leadId: string; redirectUrl?: string } = {
       success: true,
@@ -369,7 +339,7 @@ export default async function handler(
   } catch (err) {
     const message =
       err instanceof SalesforceCreateLeadError
-        ? `sf:${err.status}:${err.errors[0]?.statusCode ?? "unknown"}`
+        ? `sf:${err.status}:${err.errors[0]?.errorCode ?? "unknown"}`
         : err instanceof Error
           ? err.message
           : String(err);

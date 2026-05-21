@@ -117,7 +117,7 @@ export async function releaseHeldSubmission(
   } catch (err) {
     const message =
       err instanceof SalesforceCreateLeadError
-        ? `sf:${err.status}:${err.errors[0]?.statusCode ?? "unknown"}`
+        ? `sf:${err.status}:${err.errors[0]?.errorCode ?? "unknown"}`
         : err instanceof Error
           ? err.message
           : String(err);
