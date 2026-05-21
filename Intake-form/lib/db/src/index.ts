@@ -46,6 +46,11 @@ export const users = pgTable("users", {
   // bcryptjs hash, cost factor 10. Plaintext never touches the DB or logs.
   passwordHash: text("password_hash").notNull(),
   name: text("name").notNull(),
+  // RBAC role — 'admin' (full access) or 'marketing' (Links/Submissions/
+  // Activity only). Defaults to 'admin' so every pre-RBAC row keeps full
+  // access. Plain text, not a pg enum, to stay flexible; validated app-side
+  // (see api/_lib/roles.ts).
+  role: text("role").notNull().default("admin"),
   isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()

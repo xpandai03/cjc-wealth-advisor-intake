@@ -7,7 +7,11 @@ import {
   type ReactNode,
 } from "react";
 
-export type AuthUser = { email: string; name: string };
+// RBAC role. Mirrors the server-side union in api/_lib/roles.ts — kept as a
+// local declaration because the SPA bundle can't import server packages.
+export type Role = "admin" | "marketing";
+
+export type AuthUser = { email: string; name: string; role: Role };
 
 type AuthStatus = "loading" | "authenticated" | "unauthenticated";
 

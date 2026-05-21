@@ -14,7 +14,7 @@
 
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { db, desc, eq, submissions } from "@workspace/db";
-import { requireAuth } from "../_lib/auth";
+import { requireRole } from "../_lib/auth";
 import { releaseHeldSubmission } from "../_lib/release";
 
 const MAX_BULK_BATCH = 50;
@@ -27,7 +27,7 @@ export default async function handler(
     res.setHeader("Allow", "POST");
     return res.status(405).json({ error: "Method not allowed" });
   }
-  const auth = await requireAuth(req, res);
+  const auth = await requireRole(req, res, ["admin"]);
   if (!auth) return;
 
   // Snapshot the held queue at the start. We process from this list;

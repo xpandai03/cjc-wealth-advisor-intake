@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/lib/auth-context";
+import { useAuth, type Role } from "@/lib/auth-context";
 
 /**
  * Wraps every /admin/* page (except /admin/signin). Reads the auth status
@@ -17,23 +17,28 @@ import { useAuth } from "@/lib/auth-context";
  * problem on the client.
  */
 
+// `roles` declares which roles see each tab. The server is the real gate
+// (every /api/* handler uses requireRole) — this filtering is UX so a
+// marketing user never sees a tab they'd be 403'd out of.
 const TABS: Array<{
   to: string;
   label: string;
   match: (path: string) => boolean;
+  roles: Role[];
   badgeQueryKey?: string;
 }> = [
-  { to: "/admin/links", label: "Links", match: (p) => p === "/admin/links" || p === "/admin" },
-  { to: "/admin/submissions", label: "Submissions", match: (p) => p.startsWith("/admin/submissions") },
+  { to: "/admin/links", label: "Links", match: (p) => p === "/admin/links" || p === "/admin", roles: ["admin", "marketing"] },
+  { to: "/admin/submissions", label: "Submissions", match: (p) => p.startsWith("/admin/submissions"), roles: ["admin", "marketing"] },
   {
     to: "/admin/held-leads",
     label: "Held Leads",
     match: (p) => p.startsWith("/admin/held-leads"),
+    roles: ["admin"],
     badgeQueryKey: "held-count",
   },
-  { to: "/admin/activity", label: "Activity", match: (p) => p.startsWith("/admin/activity") },
-  { to: "/admin/scoring-rules", label: "Scoring Rules", match: (p) => p.startsWith("/admin/scoring-rules") },
-  { to: "/admin/sources", label: "Sources", match: (p) => p.startsWith("/admin/sources") },
+  { to: "/admin/activity", label: "Activity", match: (p) => p.startsWith("/admin/activity"), roles: ["admin", "marketing"] },
+  { to: "/admin/scoring-rules", label: "Scoring Rules", match: (p) => p.startsWith("/admin/scoring-rules"), roles: ["admin"] },
+  { to: "/admin/sources", label: "Sources", match: (p) => p.startsWith("/admin/sources"), roles: ["admin"] },
 ];
 
 async function fetchHeldCount(): Promise<number> {
@@ -49,12 +54,12 @@ export function AdminLayout({ children }: { children: ReactNode }) {
   const [location, setLocation] = useLocation();
   const { status, user, logout } = useAuth();
 
-  // Count badge for the Held Leads tab. Enabled only when authenticated so
-  // unauthenticated visits to /admin/signin don't ping a protected endpoint.
+  // Count badge for the Held Leads tab. Admin-only — /api/submissions/held
+  // 403s for marketing users, and they don't see the Held Leads tab anyway.
   const heldCountQuery = useQuery({
     queryKey: ["held-count"],
     queryFn: fetchHeldCount,
-    enabled: status === "authenticated",
+    enabled: status === "authenticated" && user?.role === "admin",
     refetchOnWindowFocus: true,
   });
   const heldCount = heldCountQuery.data ?? 0;
@@ -63,8 +68,18 @@ export function AdminLayout({ children }: { children: ReactNode }) {
     if (status === "unauthenticated") {
       const next = encodeURIComponent(location);
       setLocation(`/admin/signin?next=${next}`, { replace: true });
+      return;
     }
-  }, [status, location, setLocation]);
+    // Role guard: if the current route maps to a tab the user's role can't
+    // see (e.g. a marketing user deep-linking to /admin/scoring-rules),
+    // bounce to /admin/links — the shared landing for both roles.
+    if (status === "authenticated" && user) {
+      const currentTab = TABS.find((t) => t.match(location));
+      if (currentTab && !currentTab.roles.includes(user.role)) {
+        setLocation("/admin/links", { replace: true });
+      }
+    }
+  }, [status, location, setLocation, user]);
 
   if (status !== "authenticated" || !user) {
     return (
@@ -78,6 +93,10 @@ export function AdminLayout({ children }: { children: ReactNode }) {
       </div>
     );
   }
+
+  // Tabs the signed-in user's role is allowed to see. The server enforces
+  // the same matrix on every endpoint; this just keeps the nav honest.
+  const visibleTabs = TABS.filter((tab) => tab.roles.includes(user.role));
 
   return (
     <div
@@ -111,7 +130,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
             "md:gap-1"
           }
         >
-          {TABS.map((tab) => {
+          {visibleTabs.map((tab) => {
             const isActive = tab.match(location);
             const showBadge = tab.badgeQueryKey === "held-count" && heldCount > 0;
             return (

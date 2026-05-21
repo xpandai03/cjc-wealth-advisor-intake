@@ -7,7 +7,7 @@
 
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { db, eq, settings, settingsAudit } from "@workspace/db";
-import { requireAuth } from "../_lib/auth";
+import { requireRole } from "../_lib/auth";
 
 function firstOf(value: unknown): string | undefined {
   if (Array.isArray(value)) return value[0] as string | undefined;
@@ -19,7 +19,7 @@ export default async function handler(
   req: VercelRequest,
   res: VercelResponse,
 ) {
-  const auth = await requireAuth(req, res);
+  const auth = await requireRole(req, res, ["admin"]);
   if (!auth) return;
 
   const key = firstOf(req.query.key);
