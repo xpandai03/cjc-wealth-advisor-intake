@@ -66,7 +66,10 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-/* LIGHT MODE — CJ Wealth Red/White Brand */
+/* LIGHT MODE — SOFA V1 (Navy & Gold) for the public intake form.
+   Admin pages still render in CJC red via inline styles in AdminLayout.tsx /
+   SignIn.tsx / LinkGenerator.tsx / Sources.tsx — intentionally out of scope
+   for this rebrand pass. */
 :root {
   --button-outline: rgba(0,0,0, .10);
   --badge-outline: rgba(0,0,0, .05);
@@ -74,62 +77,75 @@
   --elevate-1: rgba(0,0,0, .03);
   --elevate-2: rgba(0,0,0, .08);
 
-  /* Brand red: CJ Wealth crimson */
-  --primary: 0 73% 37%;           /* #A71B1B rich crimson */
-  --primary-foreground: 0 0% 100%;
+  /* SOFA V1 raw palette (per BRAND SHEET.pdf, p.1). Stored as HSL component
+     triplets so they compose with the existing hsl(var(--token)) callsites. */
+  --sofa-navy: 211 66% 17%;       /* #0E2A47 */
+  --sofa-navy-2: 212 60% 22%;     /* #163558 */
+  --sofa-gold: 38 45% 56%;        /* #C29D5C Roadmap Gold */
+  --sofa-pale: 217 20% 77%;       /* #B9C2D0 Pale Blue */
+  --sofa-cream: 45 36% 96%;       /* #F8F6F0 Doc Cream */
 
-  /* Page background: deep red */
-  --background: 0 70% 30%;        /* #822020 deep red */
-  --foreground: 0 0% 98%;
+  /* Primary = Roadmap Gold. Drives focus rings, accents, primary buttons. */
+  --primary: 38 45% 56%;
+  --primary-foreground: 211 66% 17%;
 
-  /* Cards: crisp white */
+  /* Page background: cream (matches brand sheet body bg). Note: Home.tsx
+     overrides the page chrome to solid navy via inline style — the cream
+     here is for any framework-level surfaces. */
+  --background: 45 36% 96%;
+  --foreground: 211 66% 17%;
+
+  /* Cards: crisp white over the navy hero (matches V1 reference). */
   --card: 0 0% 100%;
-  --card-foreground: 0 0% 10%;
-  --card-border: 0 0% 90%;
+  --card-foreground: 211 66% 17%;
+  --card-border: 217 20% 88%;
 
   /* Borders, inputs */
-  --border: 0 0% 88%;
-  --input: 0 0% 85%;
-  --ring: 0 73% 37%;
+  --border: 217 20% 85%;
+  --input: 217 20% 85%;
+  --ring: 38 45% 56%;             /* gold focus ring */
 
   /* Muted surfaces */
-  --muted: 0 0% 96%;
-  --muted-foreground: 0 0% 45%;
+  --muted: 45 30% 94%;
+  --muted-foreground: 212 25% 35%;
 
-  /* Accent = lighter red tint */
-  --accent: 0 60% 96%;
-  --accent-foreground: 0 73% 32%;
+  /* Accent = pale gold tint */
+  --accent: 38 45% 92%;
+  --accent-foreground: 211 66% 17%;
 
   /* Secondary */
-  --secondary: 0 0% 96%;
-  --secondary-foreground: 0 0% 10%;
+  --secondary: 217 20% 92%;
+  --secondary-foreground: 211 66% 17%;
 
   /* Destructive */
-  --destructive: 0 84% 60%;
+  --destructive: 0 72% 45%;
   --destructive-foreground: 0 0% 98%;
 
-  /* Sidebar (unused but required) */
-  --sidebar: 0 70% 28%;
-  --sidebar-foreground: 0 0% 98%;
-  --sidebar-border: 0 50% 40%;
-  --sidebar-primary: 0 73% 37%;
-  --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 0 60% 35%;
-  --sidebar-accent-foreground: 0 0% 100%;
-  --sidebar-ring: 0 73% 37%;
+  /* Sidebar (unused but required by @theme inline mapping above) */
+  --sidebar: 211 66% 17%;
+  --sidebar-foreground: 45 36% 96%;
+  --sidebar-border: 212 60% 28%;
+  --sidebar-primary: 38 45% 56%;
+  --sidebar-primary-foreground: 211 66% 17%;
+  --sidebar-accent: 212 60% 28%;
+  --sidebar-accent-foreground: 45 36% 96%;
+  --sidebar-ring: 38 45% 56%;
 
   --popover: 0 0% 100%;
-  --popover-foreground: 0 0% 10%;
-  --popover-border: 0 0% 88%;
+  --popover-foreground: 211 66% 17%;
+  --popover-border: 217 20% 85%;
 
-  --chart-1: 0 73% 37%;
-  --chart-2: 0 50% 55%;
-  --chart-3: 0 30% 70%;
-  --chart-4: 0 10% 80%;
-  --chart-5: 0 0% 90%;
+  --chart-1: 38 45% 56%;
+  --chart-2: 211 66% 30%;
+  --chart-3: 217 20% 77%;
+  --chart-4: 212 60% 22%;
+  --chart-5: 45 36% 96%;
 
-  --app-font-sans: 'Inter', sans-serif;
-  --app-font-serif: Georgia, serif;
+  /* Calibri is system-resident on Windows; Carlito is the Google Fonts
+     metric-compatible fallback for everywhere else. No licensed webfont
+     per the rebrand brief. */
+  --app-font-sans: 'Calibri', 'Carlito', system-ui, -apple-system, sans-serif;
+  --app-font-serif: Georgia, 'Times New Roman', serif;
   --app-font-mono: Menlo, monospace;
   --radius: .5rem;
 
@@ -153,6 +169,9 @@
   --destructive-border: hsl(var(--destructive));
 }
 
+/* Dormant — nothing toggles .dark on the public form today. Kept in sync
+   with the light palette (navy surfaces, gold accent) so accidental darkmode
+   wouldn't render as the old red. */
 .dark {
   --button-outline: rgba(255,255,255, .10);
   --badge-outline: rgba(255,255,255, .05);
@@ -160,40 +179,40 @@
   --elevate-1: rgba(255,255,255, .04);
   --elevate-2: rgba(255,255,255, .09);
 
-  --primary: 0 73% 45%;
-  --primary-foreground: 0 0% 100%;
-  --background: 0 70% 18%;
-  --foreground: 0 0% 98%;
-  --card: 0 60% 22%;
-  --card-foreground: 0 0% 98%;
-  --card-border: 0 50% 30%;
-  --border: 0 50% 30%;
-  --input: 0 50% 32%;
-  --ring: 0 73% 45%;
-  --muted: 0 55% 25%;
-  --muted-foreground: 0 20% 65%;
-  --accent: 0 60% 30%;
-  --accent-foreground: 0 0% 98%;
-  --secondary: 0 55% 25%;
-  --secondary-foreground: 0 0% 98%;
-  --destructive: 0 84% 60%;
+  --primary: 38 45% 56%;
+  --primary-foreground: 211 66% 17%;
+  --background: 211 66% 12%;
+  --foreground: 45 36% 96%;
+  --card: 212 60% 18%;
+  --card-foreground: 45 36% 96%;
+  --card-border: 212 60% 28%;
+  --border: 212 60% 28%;
+  --input: 212 60% 30%;
+  --ring: 38 45% 56%;
+  --muted: 212 50% 22%;
+  --muted-foreground: 217 20% 70%;
+  --accent: 212 60% 25%;
+  --accent-foreground: 45 36% 96%;
+  --secondary: 212 50% 22%;
+  --secondary-foreground: 45 36% 96%;
+  --destructive: 0 72% 50%;
   --destructive-foreground: 0 0% 98%;
-  --sidebar: 0 70% 18%;
-  --sidebar-foreground: 0 0% 98%;
-  --sidebar-border: 0 50% 28%;
-  --sidebar-primary: 0 73% 45%;
-  --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 0 60% 28%;
-  --sidebar-accent-foreground: 0 0% 98%;
-  --sidebar-ring: 0 73% 45%;
-  --popover: 0 60% 22%;
-  --popover-foreground: 0 0% 98%;
-  --popover-border: 0 50% 30%;
-  --chart-1: 0 73% 55%;
-  --chart-2: 0 50% 60%;
-  --chart-3: 0 30% 65%;
-  --chart-4: 0 10% 75%;
-  --chart-5: 0 0% 85%;
+  --sidebar: 211 66% 12%;
+  --sidebar-foreground: 45 36% 96%;
+  --sidebar-border: 212 60% 26%;
+  --sidebar-primary: 38 45% 56%;
+  --sidebar-primary-foreground: 211 66% 17%;
+  --sidebar-accent: 212 60% 25%;
+  --sidebar-accent-foreground: 45 36% 96%;
+  --sidebar-ring: 38 45% 56%;
+  --popover: 212 60% 18%;
+  --popover-foreground: 45 36% 96%;
+  --popover-border: 212 60% 28%;
+  --chart-1: 38 45% 56%;
+  --chart-2: 211 66% 40%;
+  --chart-3: 217 20% 70%;
+  --chart-4: 212 60% 30%;
+  --chart-5: 45 36% 90%;
 
   --shadow-2xs: 0px 2px 0px 0px rgba(0,0,0,0.08);
   --shadow-xs: 0px 2px 4px 0px rgba(0,0,0,0.12);

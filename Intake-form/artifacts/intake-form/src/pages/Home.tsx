@@ -5,7 +5,12 @@ import { toast } from "sonner";
 import { RadioCard } from "@/components/ui/RadioCard";
 import { Input } from "@/components/ui/Input";
 import { cn } from "@/lib/utils";
-import cjLogo from "@assets/cj-ss_1773942560897.png";
+// SOFA V1 logo — interim asset. The PNG has a baked-in navy panel (not a
+// transparent native mark), so it must sit inside a navy region of matching
+// hue. TODO: replace with a transparent SOFA SVG/PNG once Raunek provides one.
+// TODO: add Capitol hero photo and "Hosted by CJ Campbell" small mark — both
+// missing from the current asset drop.
+const sofaLogo = "/sofa/sofa-logo-navy.png";
 
 // --- Feature flags ---
 
@@ -305,7 +310,7 @@ export default function Home() {
         <div className="grid gap-6">
           <div className="grid gap-6 sm:grid-cols-2">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-500 ml-1">First Name</label>
+              <label className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 ml-1">First Name</label>
               <Input
                 placeholder="e.g. Jane"
                 value={data.firstName}
@@ -314,7 +319,7 @@ export default function Home() {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-500 ml-1">Last Name</label>
+              <label className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 ml-1">Last Name</label>
               <Input
                 placeholder="e.g. Doe"
                 value={data.lastName}
@@ -323,7 +328,7 @@ export default function Home() {
             </div>
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-500 ml-1">Email Address</label>
+            <label className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 ml-1">Email Address</label>
             <Input
               type="email"
               placeholder="jane.doe@example.com"
@@ -345,7 +350,7 @@ export default function Home() {
         <div className="grid gap-6">
           <div className="grid gap-6 sm:grid-cols-2">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-500 ml-1">Phone Number</label>
+              <label className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 ml-1">Phone Number</label>
               <Input
                 type="tel"
                 placeholder="(555) 000-0000"
@@ -355,7 +360,7 @@ export default function Home() {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-500 ml-1">State of Residence</label>
+              <label className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 ml-1">State of Residence</label>
               <Input
                 placeholder="e.g. California"
                 value={data.stateResidence}
@@ -364,7 +369,7 @@ export default function Home() {
             </div>
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-500 ml-1">Federal Agency</label>
+            <label className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 ml-1">Federal Agency</label>
             <div className="relative">
               <select
                 value={data.agency}
@@ -388,7 +393,7 @@ export default function Home() {
                   exit={{ opacity: 0, height: 0, marginTop: 0 }}
                   className="space-y-2 overflow-hidden"
                 >
-                  <label className="text-sm font-medium text-slate-500 ml-1">Please specify your agency</label>
+                  <label className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 ml-1">Please specify your agency</label>
                   <Input
                     placeholder="Enter your agency name"
                     value={data.agencyOther}
@@ -568,7 +573,7 @@ export default function Home() {
                   exit={{ opacity: 0, height: 0, marginTop: 0 }}
                   className="space-y-2 overflow-hidden"
                 >
-                  <label className="text-sm font-medium text-slate-500 ml-1">
+                  <label className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 ml-1">
                     If NO, what percentage are you contributing?
                   </label>
                   <div className="relative max-w-xs">
@@ -722,37 +727,75 @@ export default function Home() {
   return (
     <div
       className="min-h-screen flex flex-col font-sans relative overflow-hidden"
-      // Solid CJC red — matches the admin shell (AdminLayout.tsx) so the
-      // logo PNG's edges blend seamlessly. Was a 3-stop gradient that
-      // produced dark/light patches around the logo (see screenshot 2026-05-15).
-      //
-      // The bubble overlays we used to render here (bg-white/5, bg-black/10,
-      // etc.) lightened the surrounding red just enough to make the logo
-      // PNG's baked-in `#CD1C3A` background visible as a darker rectangle
-      // by contrast. Admin has no overlays — removed for parity.
-      style={{ background: "#CD1C3A" }}
+      // SOFA V1: solid navy page. The SOFA logo PNG has a baked-in navy
+      // panel — keeping the page bg at the same hsl(var(--sofa-navy)) so
+      // the panel edges blend into the page chrome.
+      style={{ background: "hsl(var(--sofa-navy))" }}
     >
-      {/* Hero logo — centered, sized to match the admin app's
-          LinkGenerator hero. No rounded-lg (was clipping/highlighting the
-          logo's edge against the gradient). */}
-      <header className="relative z-10 w-full pt-6 px-12 sm:px-6 flex justify-center">
+      {/* Tight chapter bar — small-caps "DC METROPOLITAN CHAPTER" per V1
+          deck-cover treatment. Slightly darker navy than the page so it
+          reads as a banded element. */}
+      <div
+        className="relative z-10 w-full"
+        style={{ background: "hsl(var(--sofa-navy-2))" }}
+      >
+        <div className="max-w-5xl mx-auto px-6 py-2 text-center">
+          <span
+            className="text-xs tracking-[0.25em] uppercase"
+            style={{ color: "hsl(var(--sofa-pale))" }}
+          >
+            DC Metropolitan Chapter
+          </span>
+        </div>
+      </div>
+
+      {/* Hero. V1 calls for the SOFA logo over a Capitol photo — Capitol
+          photo not yet provided, so the logo sits on the solid navy hero
+          for now. The title is Georgia italic ("Brand Direction" treatment
+          from the brand sheet); subtitle in Calibri body. */}
+      <header className="relative z-10 w-full px-6 pt-8 pb-6 sm:pt-10 sm:pb-8 flex flex-col items-center text-center">
         <img
-          src={cjLogo}
-          alt="CJ Wealth Management"
-          className="h-16 sm:h-20 md:h-24 w-auto object-contain"
+          src={sofaLogo}
+          alt="SOFA — The Society for Financial Awareness, DC Metropolitan Chapter"
+          className="h-20 sm:h-24 md:h-28 w-auto object-contain"
         />
+        <h1
+          className="mt-6 text-4xl sm:text-5xl md:text-6xl leading-tight"
+          style={{
+            fontFamily: "var(--app-font-serif)",
+            color: "hsl(var(--sofa-cream))",
+          }}
+        >
+          Federal Retirement <em style={{ color: "hsl(var(--sofa-gold))" }}>Intake</em>
+        </h1>
+        <p
+          className="mt-3 text-base sm:text-lg max-w-2xl"
+          style={{ color: "hsl(var(--sofa-pale))" }}
+        >
+          Tell us about your federal service so a SOFA-affiliated advisor can follow up with the right materials for your stage of career.
+        </p>
+        {/* TODO: insert "Hosted by [CJ Campbell mark]" small lockup here
+            once Raunek provides the asset. Brand sheet V1 places it just
+            beneath the subtitle. */}
       </header>
 
-      <div className="relative z-10 w-full max-w-5xl mx-auto px-6 mt-6 mb-2 flex justify-end">
-        <span className="text-sm font-medium text-white/70">
+      <div className="relative z-10 w-full max-w-5xl mx-auto px-6 mt-2 mb-2 flex justify-end">
+        <span
+          className="text-xs uppercase tracking-[0.15em]"
+          style={{ color: "hsl(var(--sofa-pale))" }}
+        >
           Step {stepIndex + 1} of {totalSteps}
         </span>
       </div>
 
       <div className="relative z-10 w-full max-w-5xl mx-auto px-6 mb-8">
-        <div className="h-1.5 w-full bg-white/20 rounded-full overflow-hidden">
+        <div
+          className="h-1 w-full rounded-full overflow-hidden"
+          style={{ background: "hsl(var(--sofa-navy-2))" }}
+        >
           <motion.div
-            className="h-full bg-white rounded-full"
+            className="h-full rounded-full"
+            style={{ background: "hsl(var(--sofa-gold))" }}
             initial={{ width: 0 }}
             animate={{ width: `${((stepIndex + 1) / totalSteps) * 100}%` }}
             transition={{ duration: 0.5, ease: "easeInOut" }}
@@ -787,8 +830,11 @@ export default function Home() {
       </main>
 
       <footer
-        className="fixed bottom-0 left-0 w-full z-20 backdrop-blur-xl border-t border-white/10"
-        style={{ background: "rgba(120, 20, 20, 0.85)" }}
+        className="fixed bottom-0 left-0 w-full z-20 backdrop-blur-xl border-t"
+        style={{
+          background: "hsl(var(--sofa-navy-2) / 0.92)",
+          borderColor: "hsl(var(--sofa-gold) / 0.25)",
+        }}
       >
         <div className="w-full max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center">
@@ -817,9 +863,20 @@ export default function Home() {
               className={cn(
                 "flex items-center gap-2 px-8 py-3.5 font-semibold rounded-xl shadow-lg transition-all duration-300",
                 canProceed
-                  ? "bg-white text-[#A82020] hover:bg-white/90 shadow-black/20 hover:shadow-xl hover:-translate-y-0.5"
-                  : "bg-white/20 text-white/40 cursor-not-allowed shadow-none",
+                  ? "hover:-translate-y-0.5 hover:shadow-xl shadow-black/20"
+                  : "cursor-not-allowed shadow-none",
               )}
+              style={
+                canProceed
+                  ? {
+                      background: "hsl(var(--sofa-gold))",
+                      color: "hsl(var(--sofa-navy))",
+                    }
+                  : {
+                      background: "hsl(var(--sofa-pale) / 0.2)",
+                      color: "hsl(var(--sofa-pale) / 0.5)",
+                    }
+              }
             >
               {isSubmitting ? (
                 <>
@@ -828,7 +885,7 @@ export default function Home() {
                 </>
               ) : (
                 <>
-                  {isFinalAction ? "Submit" : "Continue"}
+                  {isFinalAction ? "Request Follow-Up" : "Continue"}
                   {isFinalAction ? <CheckCircle2 className="w-5 h-5" /> : <ArrowRight className="w-5 h-5" />}
                 </>
               )}
@@ -853,7 +910,13 @@ function StepContainer({
 }) {
   return (
     <div className="w-full">
-      <h2 className="text-3xl md:text-4xl lg:text-4xl font-bold text-slate-900 leading-tight mb-3">
+      <h2
+        className="text-3xl md:text-4xl lg:text-4xl leading-tight mb-3"
+        style={{
+          fontFamily: "var(--app-font-serif)",
+          color: "hsl(var(--sofa-navy))",
+        }}
+      >
         {title}
       </h2>
       {description && (
@@ -877,17 +940,23 @@ function SuccessScreen({
       : "Thanks for attending — we appreciate your time";
   const subhead =
     variant === "yes"
-      ? "A member of the CJC team will reach out within 24 hours to schedule your consultation."
+      ? "A member of our team will reach out within 24 hours to schedule your consultation."
       : "Feel free to reach out anytime if your situation changes.";
 
   return (
     <div
       className="min-h-screen flex flex-col font-sans relative overflow-hidden items-center justify-center"
-      style={{ background: "linear-gradient(135deg, #8B1A1A 0%, #A82020 40%, #C0282B 100%)" }}
+      style={{
+        background:
+          "linear-gradient(135deg, hsl(var(--sofa-navy)) 0%, hsl(var(--sofa-navy-2)) 60%, hsl(var(--sofa-navy)) 100%)",
+      }}
     >
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-white/5" />
-        <div className="absolute top-1/3 -left-24 w-64 h-64 rounded-full bg-white/4" />
+        <div
+          className="absolute top-1/3 -left-24 w-64 h-64 rounded-full"
+          style={{ background: "hsl(var(--sofa-gold) / 0.08)" }}
+        />
         <div className="absolute bottom-0 right-1/4 w-80 h-80 rounded-full bg-black/10" />
       </div>
       <div className="relative z-10 w-full max-w-3xl mx-auto px-6 py-12">
@@ -896,11 +965,21 @@ function SuccessScreen({
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: "spring", stiffness: 200, damping: 20 }}
-            className="w-20 h-20 rounded-2xl bg-red-100 flex items-center justify-center shadow-lg mx-auto mb-6"
+            className="w-20 h-20 rounded-2xl flex items-center justify-center shadow-lg mx-auto mb-6"
+            style={{ background: "hsl(var(--sofa-gold) / 0.15)" }}
           >
-            <CheckCircle2 className="w-10 h-10 text-[#A82020]" />
+            <CheckCircle2
+              className="w-10 h-10"
+              style={{ color: "hsl(var(--sofa-gold))" }}
+            />
           </motion.div>
-          <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-3">
+          <h1
+            className="text-3xl md:text-4xl mb-3"
+            style={{
+              fontFamily: "var(--app-font-serif)",
+              color: "hsl(var(--sofa-navy))",
+            }}
+          >
             {headline}
             {firstName ? `, ${firstName}` : ""}.
           </h1>
